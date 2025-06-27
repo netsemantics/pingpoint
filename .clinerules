@@ -1,0 +1,109 @@
+## 1. Documentation Requirements
+
+- **Whenever you add or modify features**  
+  - Update the corresponding docs under `/docs/`.  
+  - Keep **`README.md`** in sync: installation, usage examples, configuration notes.  
+  - Append human-readable entries to **`CHANGELOG.md`**.
+
+- **Architecture Decision Records (ADRs)**  
+  - Create a new ADR in `/docs/adr/` for any of:  
+    - Major dependency upgrades or replacements  
+    - Shifts in overall architectural patterns (e.g. moving from threading to asyncio)  
+    - New integration points (e.g. adding a REST API, SSH connector)  
+    - Changes to data models or schema (e.g. new database tables, message formats)  
+  - Use the template file at `/docs/adr/template.md`.
+
+---
+
+## 2. Packaging & Environment
+
+- **Python Versions**  
+  - Support **Python 3.10+**; specify exact version in `pyproject.toml`.
+
+- **Dependency Management**  
+  - Use **Poetry** (preferred) or **pip-tools** to pin dependencies.  
+  - Check `pyproject.toml` and `poetry.lock` (or `requirements.txt` / `requirements.lock`) into Git.
+
+- **Virtual Environments**  
+  - Always develop within a venv or Conda environment.  
+  - Document setup commands in **`README.md`**.
+
+- **Containerization Placeholder**  
+  - You’ll eventually run inside an LXC container on Proxmox.  
+  - For now, add a `Dockerfile` stub or a `container/` folder with notes on required base image and privileges (`cap_add: NET_RAW` for raw sockets, if needed).
+
+---
+
+## 3. Code Style & Patterns
+
+- **Formatting & Linting**  
+  - Use **Black** for formatting.  
+  - Enforce static analysis with **flake8** and type checks with **mypy**.  
+  - Configure in `pyproject.toml` or `.flake8`, `.mypy.ini`.
+
+- **Project Layout**  
+project-root/
+├── src/
+│ ├── assistant/
+│ └── generated/ ← for any codegen outputs
+├── tests/
+│ ├── unit/
+│ ├── integration/
+│ └── e2e/
+├── docs/
+├── scripts/ ← utility scripts (e.g. dev, lint, format)
+├── pyproject.toml
+├── poetry.lock
+└── README.md
+
+markdown
+Copy
+Edit
+
+- **Generated Clients & Stubs**  
+- Use **OpenAPI Generator** (Python `httpx` or `requests` template) for service clients.  
+- Place all generated code under `src/generated/` and never modify by hand.
+
+- **Design Patterns**  
+- Favor **composition** over inheritance.  
+- For data persistence, follow the **repository pattern**—define repository interfaces in `assistant/repositories/` and concrete implementations in `assistant/adapters/`.  
+- Centralize exception types in `assistant/utils/errors.py` and use them consistently.
+
+- **Configuration**  
+- Use **pydantic** (or built-in `dataclasses`) for config objects.  
+- Load environment-specific settings from `.env` (with `python-dotenv`) and validate on startup.
+
+---
+
+## 4. Testing Standards
+
+- **Unit Tests** (`tests/unit/`)  
+- Every pure-Python function or class method implementing business logic must have corresponding unit tests.  
+- Use **pytest** and fixtures for reusable setup/teardown.
+
+- **Integration Tests** (`tests/integration/`)  
+- Cover interactions with real subsystems or mocked external services (e.g. Nmap subprocess, SSH sessions).  
+- Use Docker-based fixtures or local virtual interfaces when possible.
+
+- **End-to-End Tests** (`tests/e2e/`)  
+- Simulate full workflows: scan → detect change → send webhook → update UI.  
+- Can run against a local dev server or container.
+
+- **Continuous Integration**  
+- On every pull request, run `scripts/ci.sh` to:  
+  1. Install dependencies  
+  2. Run linters (Black, flake8, mypy)  
+  3. Execute all tests  
+
+---
+
+## 5. Deployment Notes
+
+- **Configuration**  
+- Externalize all environment variables (HA webhook URL, SSH credentials, scan interval) in a `.env` or `/etc/your-app/config.yaml`.
+
+- **Service Management**  
+- Plan for a `systemd` service file in the container to launch the assistant on boot.
+
+- **Networking & Permissions**  
+- The container will need `NET_RAW` capabilities (or equivalent) for Nmap/ARP scanning.

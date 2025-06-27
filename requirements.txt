@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+paramiko
+pyyaml
+requests
+python-dotenv

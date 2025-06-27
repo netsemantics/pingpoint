@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PingPoint Dashboard</title>
+    <link rel="stylesheet" href="/static/dark-theme.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: #f8f9fa; }
+        header { background-color: #343a40; color: white; padding: 1rem; text-align: center; }
+        main { padding: 2rem; }
+        h1, h2 { color: #343a40; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #e9ecef; }
+        .status-dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; }
+        .status-online { background-color: #28a745; }
+        .status-offline { background-color: #dc3545; }
+        #timeline { margin-top: 2rem; height: 300px; border: 1px solid #dee2e6; background-color: white; }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis-timeline/7.7.2/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis-timeline/7.7.2/vis-timeline-graph2d.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>PingPoint Network Monitor</h1>
+        <button id="theme-toggle-btn">Toggle Theme</button>
+    </header>
+    <main>
+        <section id="actions-section">
+            <h2>Manual Actions</h2>
+            <button id="edgemax-scan-btn">Run EdgeMax Scan</button>
+            <button id="nmap-scan-btn">Run Nmap Scan</button>
+            <p id="scan-status"></p>
+        </section>
+        <section id="devices-section">
+            <h2>Devices</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Friendly Name</th>
+                        <th>MAC Address</th>
+                        <th>IP Address</th>
+                        <th>Vendor</th>
+                        <th>Notes</th>
+                        <th>Last Seen</th>
+                        <th>Critical</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="device-table-body">
+                    <!-- Device rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </section>
+        <section id="timeline-section">
+            <h2>Events Timeline</h2>
+            <div id="timeline"></div>
+        </section>
+    </main>
+    <script src="/static/app.js"></script>
+</body>
+</html>

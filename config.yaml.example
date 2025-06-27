@@ -1,0 +1,25 @@
+# PingPoint Configuration
+
+# List of subnets to scan (CIDR notation)
+subnets:
+  - 192.168.1.0/24
+  - 10.10.0.0/16
+
+# Scan interval in minutes
+scan_interval: 2
+
+# EdgeMax Router SSH credentials
+edgemax:
+  host: 192.168.1.1
+  port: 22
+  username: your_username
+  password: your_password
+
+# Home Assistant webhook URL for notifications
+home_assistant:
+  webhook_url: "http://homeassistant.local:8123/api/webhook/your_webhook_id"
+
+# Web UI timeline settings
+timeline:
+  # Maximum number of events to display
+  max_events: 100
