@@ -1,10 +1,15 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel, Field
+from typing import List, Optional
+import yaml
+
 from pingpoint.inventory import Inventory
 from pingpoint.scanner import EdgeMaxScanner, NmapScanner
 from pingpoint.config import load_config
 from pathlib import Path
+import logging
 
 # Path to the project root directory
 ROOT_DIR = Path(__file__).parent.parent
@@ -13,6 +18,25 @@ class DeviceDetails(BaseModel):
     friendly_name: str
     notes: str
     alert_on_offline: bool
+
+class EdgeMaxConfig(BaseModel):
+    host: str
+    port: int = 22
+    username: str
+    password: Optional[str] = None
+
+class HomeAssistantConfig(BaseModel):
+    webhook_url: Optional[str] = None
+
+class FingerbankConfig(BaseModel):
+    api_key: Optional[str] = None
+
+class AppConfig(BaseModel):
+    scan_interval: int = Field(..., alias='scan_interval')
+    subnets: List[str]
+    edgemax: EdgeMaxConfig
+    home_assistant: HomeAssistantConfig = Field(..., alias='home_assistant')
+    fingerbank: FingerbankConfig
 
 # Initialize the FastAPI app
 app = FastAPI(
@@ -23,18 +47,23 @@ app = FastAPI(
 
 # This will be our single, shared inventory instance
 # In a real application, you might manage this dependency more robustly
-inventory = Inventory(persistence_file=str(ROOT_DIR / "devices.json"))
+inventory = Inventory(persistence_file=ROOT_DIR / "devices.json")
 
 # Mount the 'static' directory to serve frontend files
 # The path is constructed relative to the project root
 app.mount("/static", StaticFiles(directory=ROOT_DIR / "static"), name="static")
 
-@app.get("/")
-async def read_root():
-    """
-    Root endpoint, can be used for a simple health check.
-    """
-    return {"message": "PingPoint API is running."}
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    """Serves the main dashboard page."""
+    with open(ROOT_DIR / "static/index.html") as f:
+        return HTMLResponse(content=f.read(), status_code=200)
+
+@app.get("/config", response_class=HTMLResponse)
+async def read_config_page(request: Request):
+    """Serves the configuration page."""
+    with open(ROOT_DIR / "static/config.html") as f:
+        return HTMLResponse(content=f.read(), status_code=200)
 
 
 @app.get("/api/devices")
@@ -106,7 +135,48 @@ async def update_device(mac: str, details: DeviceDetails):
     )
     if updated_device is None:
         raise HTTPException(status_code=404, detail="Device not found")
+    inventory.save_to_disk()
     return updated_device
+
+@app.get("/api/config")
+async def get_config():
+    """Returns the current application configuration."""
+    try:
+        return load_config(ROOT_DIR / "config.yaml")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load configuration: {e}")
+
+@app.put("/api/config")
+async def update_config(new_config: AppConfig):
+    """Updates the application configuration."""
+    config_path = ROOT_DIR / "config.yaml"
+    try:
+        # Load existing config to preserve any fields not exposed in the UI
+        existing_config = load_config(config_path)
+
+        # Update with new values
+        update_data = new_config.dict(by_alias=True, exclude_unset=True)
+
+        # Deep merge dictionaries
+        def merge_configs(old, new):
+            for k, v in new.items():
+                if isinstance(v, dict) and k in old and isinstance(old[k], dict):
+                    merge_configs(old[k], v)
+                else:
+                    # Do not update password/api_key if it's not provided
+                    if k in ['password', 'api_key'] and not v:
+                        continue
+                    old[k] = v
+            return old
+
+        final_config = merge_configs(existing_config, update_data)
+
+        with open(config_path, 'w') as f:
+            yaml.dump(final_config, f, default_flow_style=False, sort_keys=False)
+
+        return {"message": "Configuration updated successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update configuration: {e}")
 
 
 # To run this application for development:

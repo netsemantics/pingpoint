@@ -25,7 +25,7 @@ class FingerbankClient:
             logging.warning(f"Device {device.friendly_name} has no fingerprint to enrich.")
             return False
 
-        payload = self._prepare_payload(device.fingerprint)
+        payload = self._prepare_payload(device.fingerprint, device.mac)
         headers = {"Content-Type": "application/json"}
         url = f"{self.base_url}/combinations/interrogate?key={self.api_key}"
 
@@ -55,11 +55,14 @@ class FingerbankClient:
             logging.error(f"Fingerbank API request failed: {e}")
             return False
 
-    def _prepare_payload(self, fingerprint: Fingerprint) -> dict:
+    def _prepare_payload(self, fingerprint: Fingerprint, mac: str) -> dict:
         """Prepares the payload for the Fingerbank API request."""
-        # This is a simplified payload preparation.
-        # A real implementation would need to map Nmap results to Fingerbank's expected format.
         payload = {
-            "dhcp_fingerprint": fingerprint.os_match, # Using OS match as a proxy
+            "mac": mac,
+            "dhcp_fingerprint": fingerprint.os_match,
         }
+        # Add open ports to the payload if available
+        if fingerprint.ports:
+            payload["open_ports"] = [p["portid"] for p in fingerprint.ports]
+
         return payload

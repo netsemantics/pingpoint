@@ -17,6 +17,24 @@
         .status-online { background-color: #28a745; }
         .status-offline { background-color: #dc3545; }
         #timeline { margin-top: 2rem; height: 300px; border: 1px solid #dee2e6; background-color: white; }
+        /* Styles for expanding input fields */
+        #device-table-body input[type="text"] {
+            transition: width 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            width: 140px; /* Default width */
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #device-table-body input[type="text"]:focus {
+            width: 220px; /* Expanded width */
+            box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+        }
+        /* Timeline event colors */
+        .vis-item.new-device { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .vis-item.returning-device { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .vis-item.offline-device { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        .vis-item.ip-change-device { background-color: #fff3cd; border-color: #ffeeba; color: #856404; }
+        .vis-item .vis-item-content { padding: 5px; }
     </style>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/vis-timeline/7.7.2/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis-timeline/7.7.2/vis-timeline-graph2d.min.js"></script>
@@ -32,6 +50,10 @@
             <button id="edgemax-scan-btn">Run EdgeMax Scan</button>
             <button id="nmap-scan-btn">Run Nmap Scan</button>
             <p id="scan-status"></p>
+        </section>
+        <section id="timeline-section">
+            <h2>Events Timeline</h2>
+            <div id="timeline"></div>
         </section>
         <section id="devices-section">
             <h2>Devices</h2>
@@ -53,10 +75,6 @@
                     <!-- Device rows will be inserted here by JavaScript -->
                 </tbody>
             </table>
-        </section>
-        <section id="timeline-section">
-            <h2>Events Timeline</h2>
-            <div id="timeline"></div>
         </section>
     </main>
     <script src="/static/app.js"></script>

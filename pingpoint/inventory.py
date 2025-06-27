@@ -10,7 +10,7 @@ from .models import Device, Fingerprint
 
 class Inventory:
     """Manages the collection of all known devices."""
-    def __init__(self, persistence_file: str = "devices.json", offline_debounce_scans: int = 2):
+    def __init__(self, persistence_file: Path, offline_debounce_scans: int = 2):
         self.devices = {}  # Keyed by MAC address
         self.persistence_file = persistence_file
         self.events = [] # To log recent events
@@ -157,7 +157,7 @@ class Inventory:
                 import json
                 json.dump([dev.to_dict() for dev in self.devices.values()], f, indent=2)
         except IOError as e:
-            print(f"Error saving inventory to {self.persistence_file}: {e}")
+            logging.error(f"Error saving inventory to {self.persistence_file}: {e}")
 
     def load_from_disk(self):
         """Loads the inventory from a JSON file."""
@@ -170,7 +170,7 @@ class Inventory:
             # It's okay if the file doesn't exist on first run
             self.devices = {}
         except (IOError, json.JSONDecodeError) as e:
-            print(f"Error loading inventory from {self.persistence_file}: {e}")
+            logging.error(f"Error loading inventory from {self.persistence_file}: {e}")
             self.devices = {}
 
 

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PingPoint Configuration</title>
+    <link rel="stylesheet" href="/static/dark-theme.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: #f8f9fa; color: #343a40; }
+        header { background-color: #343a40; color: white; padding: 1rem; text-align: center; }
+        main { padding: 2rem; max-width: 800px; margin: auto; }
+        h1, h2 { color: #343a40; }
+        form { background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        label { font-weight: bold; display: block; margin-top: 1rem; }
+        input[type="text"], input[type="number"], input[type="password"], textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+        textarea { resize: vertical; min-height: 80px; }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1.5rem;
+        }
+        button:hover { background-color: #0056b3; }
+        .notification {
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+            display: none;
+        }
+        .notification.success { background-color: #d4edda; color: #155724; }
+        .notification.error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>PingPoint Configuration</h1>
+        <a href="/" style="color: white; text-decoration: none;">Back to Dashboard</a>
+    </header>
+    <main>
+        <form id="config-form">
+            <h2>General Settings</h2>
+            <label for="scan-interval">Scan Interval (minutes)</label>
+            <input type="number" id="scan-interval" name="scan_interval" min="1" required>
+
+            <label for="subnets">Subnets (comma-separated)</label>
+            <textarea id="subnets" name="subnets" required></textarea>
+
+            <h2>EdgeMax Router</h2>
+            <label for="edgemax-host">Host</label>
+            <input type="text" id="edgemax-host" name="edgemax_host">
+            <label for="edgemax-port">Port</label>
+            <input type="number" id="edgemax-port" name="edgemax_port" min="1">
+            <label for="edgemax-user">Username</label>
+            <input type="text" id="edgemax-user" name="edgemax_user">
+            <label for="edgemax-password">Password</label>
+            <input type="password" id="edgemax-password" name="edgemax_password" placeholder="Leave blank to keep unchanged">
+
+            <h2>Home Assistant</h2>
+            <label for="ha-webhook-url">Webhook URL</label>
+            <input type="text" id="ha-webhook-url" name="ha_webhook_url">
+
+            <h2>Fingerbank API</h2>
+            <label for="fb-api-key">API Key</label>
+            <input type="password" id="fb-api-key" name="fb_api_key" placeholder="Leave blank to keep unchanged">
+
+            <button type="submit">Save Configuration</button>
+        </form>
+        <div id="notification" class="notification"></div>
+    </main>
+    <script src="/static/config.js"></script>
+</body>
+</html>

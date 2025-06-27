@@ -72,25 +72,49 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderTimeline = (events) => {
+        const getClassName = (eventType) => {
+            switch (eventType) {
+                case 'device_joined': return 'new-device';
+                case 'device_reconnected': return 'returning-device';
+                case 'device_offline': return 'offline-device';
+                case 'device_ip_change': return 'ip-change-device';
+                default: return '';
+            }
+        };
+
         const items = new vis.DataSet(events.map((event, index) => ({
             id: index,
-            content: event.message,
+            content: ``, // Keep content empty for a smaller icon-like appearance
             start: event.timestamp,
-            className: `event-${event.type}`
+            title: `<b>${event.message}</b><br>
+                    Device: ${event.device.friendly_name || event.device.mac}<br>
+                    IP: ${event.device.ip_addresses.join(', ')}<br>
+                    Time: ${new Date(event.timestamp).toLocaleString()}`,
+            className: getClassName(event.type),
+            type: 'point' // Use points for a cleaner look
         })));
 
-        if (!timeline) {
-            const options = {
-                stack: false,
-                margin: {
-                    item: 20
-                }
-            };
-            timeline = new vis.Timeline(timelineContainer, items, options);
-        } else {
+        const options = {
+            stack: false,
+            height: '200px',
+            showMajorLabels: true,
+            showMinorLabels: true,
+            zoomable: true,
+            zoomMin: 1000 * 60 * 5, // 5 minutes
+            zoomMax: 1000 * 60 * 60 * 24 * 30, // 1 month
+            tooltip: {
+                followMouse: true,
+                overflowMethod: 'flip'
+            }
+        };
+
+        if (timeline) {
+            timeline.setOptions(options);
             timeline.setItems(items);
-            timeline.fit();
+        } else {
+            timeline = new vis.Timeline(timelineContainer, items, options);
         }
+        timeline.fit();
     };
 
     const fetchDevices = async () => {
@@ -166,6 +190,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const notesInput = row.querySelector('[data-field="notes"]');
                 const criticalCheckbox = row.querySelector('[data-field="alert_on_offline"]');
                 updateDeviceDetails(mac, friendlyNameInput.value, notesInput.value, criticalCheckbox.checked);
+            });
+        });
+
+        // Add focus/blur listeners for expanding input fields
+        document.querySelectorAll('#device-table-body input[type="text"]').forEach(input => {
+            input.addEventListener('focus', (e) => {
+                e.target.style.width = '220px';
+            });
+            input.addEventListener('blur', (e) => {
+                e.target.style.width = '140px';
             });
         });
     };

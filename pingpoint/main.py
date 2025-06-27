@@ -16,7 +16,7 @@ import uvicorn
 from pingpoint.scanner import scan_network
 from pingpoint.api import app, inventory
 
-def run_scanner(config):
+def run_scanner(config, inventory_instance):
     """The main scanning loop."""
     scan_interval_minutes = config.get('scan_interval', 2)
     webhook_url = config.get('home_assistant', {}).get('webhook_url')
@@ -25,8 +25,8 @@ def run_scanner(config):
         logging.info("Starting network scan...")
         try:
             scan_results = scan_network(config)
-            inventory.update_from_scan(scan_results, webhook_url)
-            inventory.save_to_disk()
+            inventory_instance.update_from_scan(scan_results, webhook_url)
+            inventory_instance.save_to_disk()
             logging.info(f"Scan complete. Found {len(scan_results)} devices.")
         except Exception as e:
             logging.error(f"An error occurred during the scan cycle: {e}")
@@ -52,7 +52,7 @@ def main():
         return
 
     # Start the scanner in a background thread
-    scanner_thread = threading.Thread(target=run_scanner, args=(config,), daemon=True)
+    scanner_thread = threading.Thread(target=run_scanner, args=(config, inventory), daemon=True)
     scanner_thread.start()
 
     # Start the FastAPI server
