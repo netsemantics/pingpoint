@@ -16,20 +16,25 @@ import uvicorn
 from pingpoint.scanner import scan_network
 from pingpoint.api import app, inventory
 
-def run_scanner(config, inventory_instance):
+def run_scanner(inventory_instance):
     """The main scanning loop."""
-    scan_interval_minutes = config.get('scan_interval', 2)
-    webhook_url = config.get('home_assistant', {}).get('webhook_url')
+    config_path = Path(__file__).parent.parent / "config.yaml"
 
     while True:
-        logging.info("Starting network scan...")
         try:
+            config = load_config(config_path)
+            scan_interval_minutes = config.get('scan_interval', 2)
+            webhook_url = config.get('home_assistant', {}).get('webhook_url')
+
+            logging.info("Starting network scan...")
             scan_results = scan_network(config)
             inventory_instance.update_from_scan(scan_results, webhook_url)
             inventory_instance.save_to_disk()
             logging.info(f"Scan complete. Found {len(scan_results)} devices.")
         except Exception as e:
             logging.error(f"An error occurred during the scan cycle: {e}")
+            # Set a default scan interval in case of config load failure
+            scan_interval_minutes = 2
         
         logging.info(f"Waiting {scan_interval_minutes} minutes for the next scan.")
         time.sleep(scan_interval_minutes * 60)
@@ -52,12 +57,17 @@ def main():
         return
 
     # Start the scanner in a background thread
-    scanner_thread = threading.Thread(target=run_scanner, args=(config, inventory), daemon=True)
+    scanner_thread = threading.Thread(target=run_scanner, args=(inventory,), daemon=True)
     scanner_thread.start()
 
     # Start the FastAPI server
     logging.info("Starting web server on http://0.0.0.0:8000")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    try:
+        uvicorn.run(app, host="0.0.0.0", port=8000)
+    finally:
+        logging.info("Shutting down. Saving inventory...")
+        inventory.save_to_disk()
+        logging.info("Inventory saved.")
 
 
 if __name__ == "__main__":

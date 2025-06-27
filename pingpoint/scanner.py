@@ -25,8 +25,9 @@ class NmapScanner:
         for subnet in self.subnets:
             try:
                 # -sn: Ping Scan - disables port scan
+                # --privileged: Assume user has privileges
                 # -oX -: Output scan in XML format to stdout
-                command = ["nmap", "-sn", "-oX", "-", subnet]
+                command = ["nmap", "-sn", "--privileged", "-oX", "-", subnet]
                 process = subprocess.run(
                     command,
                     check=True,
@@ -137,6 +138,12 @@ class NmapScanner:
             return None
 
 
+import re
+
+def is_valid_mac(mac):
+    """Checks if a string is a valid MAC address."""
+    return re.match(r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$", mac)
+
 def parse_edgemax_arp(arp_data):
     """Parses the output of 'show arp' from an EdgeMax router."""
     devices = []
@@ -146,7 +153,7 @@ def parse_edgemax_arp(arp_data):
         if len(parts) >= 4:
             ip = parts[0]
             mac = parts[3] if parts[3] != '<incomplete>' else None
-            if mac:
+            if mac and is_valid_mac(mac):
                 devices.append({'ip': ip, 'mac': mac, 'vendor': None}) # Vendor info not in arp table
     return devices
 
@@ -159,9 +166,10 @@ def parse_edgemax_leases(leases_data):
         if len(parts) >= 5:
             ip = parts[0]
             mac = parts[1]
-            # The client name can be '?' or contain spaces, so we join the rest of the parts.
-            client_name = ' '.join(parts[4:]) if parts[4] != '?' else None
-            devices.append({'ip': ip, 'mac': mac, 'hostname': client_name, 'vendor': None})
+            if is_valid_mac(mac):
+                # The client name can be '?' or contain spaces, so we join the rest of the parts.
+                client_name = ' '.join(parts[4:]) if parts[4] != '?' else None
+                devices.append({'ip': ip, 'mac': mac, 'hostname': client_name, 'vendor': None})
     return devices
 
 

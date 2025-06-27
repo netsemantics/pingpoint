@@ -45,6 +45,13 @@ app = FastAPI(
     version="1.0.0"
 )
 
+@app.on_event("shutdown")
+def shutdown_event():
+    """Saves the inventory to disk when the application shuts down."""
+    logging.info("Application shutting down, saving inventory...")
+    inventory.save_to_disk()
+    logging.info("Inventory saved.")
+
 # This will be our single, shared inventory instance
 # In a real application, you might manage this dependency more robustly
 inventory = Inventory(persistence_file=ROOT_DIR / "devices.json")

@@ -36,9 +36,12 @@ class FingerbankClient:
             
             data = response.json()
             if data.get('device_name'):
-                # Update device with enriched data
+                # If the friendly_name is still the default (MAC address), update it.
+                if device.friendly_name == device.mac:
+                    device.friendly_name = data.get('device_name')
+
+                # Always update the vendor if available
                 device.vendor = data.get('device', {}).get('vendor', {}).get('name') or device.vendor
-                device.friendly_name = data.get('device_name') or device.friendly_name
                 
                 # Extract vulnerabilities
                 if 'vulnerabilities' in data:

@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (const subnet in devicesBySubnet) {
             const subnetRow = document.createElement('tr');
-            subnetRow.innerHTML = `<td colspan="9" style="background-color: #e9ecef; font-weight: bold;">${subnet}</td>`;
+            subnetRow.innerHTML = `<td colspan="10" style="background-color: #e9ecef; font-weight: bold;">${subnet}</td>`;
             deviceTableBody.appendChild(subnetRow);
 
             const subnetDevices = devicesBySubnet[subnet];
@@ -173,6 +173,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${device.ip_addresses.join(', ') || 'N/A'}</td>
                     <td>${device.vendor || 'Unknown'}</td>
                     <td><input type="text" class="editable" data-field="notes" value="${device.notes || ''}" placeholder="Add notes..."></td>
+                    <td class="vulnerabilities-cell" data-vulnerabilities='${JSON.stringify(device.vulnerabilities)}'>
+                        ${device.vulnerabilities.length > 0 ? `<a href="#">${device.vulnerabilities.length} found</a>` : 'None'}
+                    </td>
                     <td>${new Date(device.last_seen).toLocaleString()}</td>
                     <td><input type="checkbox" class="critical-checkbox" data-field="alert_on_offline" ${device.alert_on_offline ? 'checked' : ''}></td>
                     <td><button class="save-btn">Save</button></td>
@@ -190,6 +193,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const notesInput = row.querySelector('[data-field="notes"]');
                 const criticalCheckbox = row.querySelector('[data-field="alert_on_offline"]');
                 updateDeviceDetails(mac, friendlyNameInput.value, notesInput.value, criticalCheckbox.checked);
+            });
+        });
+
+        // Add event listeners for vulnerability cells
+        document.querySelectorAll('.vulnerabilities-cell a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const cell = e.target.closest('.vulnerabilities-cell');
+                const vulnerabilities = JSON.parse(cell.dataset.vulnerabilities);
+                if (vulnerabilities.length > 0) {
+                    alert(vulnerabilities.map(v => `• ${v.name}: ${v.description}`).join('\n'));
+                }
             });
         });
 

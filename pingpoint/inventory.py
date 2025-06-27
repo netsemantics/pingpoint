@@ -27,8 +27,7 @@ class Inventory:
         event = {
             "timestamp": datetime.now().isoformat(),
             "type": event_type,
-            "device_mac": device.mac,
-            "friendly_name": device.friendly_name,
+            "device": device.to_dict(),
             "message": message
         }
         self.events.insert(0, event)
@@ -48,6 +47,7 @@ class Inventory:
         Updates the inventory based on a list of devices found in a new scan.
         Detects new devices, status changes, and IP changes.
         """
+        logging.info(f"Raw scan results: {scan_results}")
         now = datetime.now()
         scanned_macs = set()
 
@@ -72,10 +72,11 @@ class Inventory:
                     subnet=scanned_device_data.get('subnet'),
                     status="online",
                     first_seen=now,
-                    last_seen=now
+                    last_seen=now,
+                    friendly_name=mac  # Default friendly_name to MAC address
                 )
                 self.devices[mac] = new_device
-                self._add_event("device_joined", new_device, f"New device {new_device.friendly_name} joined with IP {ip}", webhook_url)
+                self._add_event("device_joined", new_device, f"New device {mac} joined with IP {ip}", webhook_url)
                 
                 # Perform fingerprint scan for the new device
                 if ip and ip != '----------':
@@ -102,7 +103,7 @@ class Inventory:
                 if not existing_device.hostname and scanned_device_data.get('hostname'):
                     existing_device.hostname = scanned_device_data.get('hostname')
                     # Also update friendly_name if it was using the default (MAC address)
-                    if existing_device.friendly_name == existing_device.mac:
+                    if not existing_device.friendly_name or existing_device.friendly_name == existing_device.mac:
                         existing_device.friendly_name = existing_device.hostname
 
                 if existing_device.status == "offline":
@@ -129,6 +130,8 @@ class Inventory:
                     self._add_event("device_offline", device, f"Device {device.friendly_name} is now offline.", webhook_url)
                     # Remove from counter once marked offline
                     self._offline_counters.pop(mac, None)
+
+        self.save_to_disk()
 
 
     def get_device(self, mac: str) -> Optional[Device]:
