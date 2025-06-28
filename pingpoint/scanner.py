@@ -166,10 +166,12 @@ def parse_edgemax_leases(leases_data):
         if len(parts) >= 5:
             ip = parts[0]
             mac = parts[1]
+            subnet = parts[4]
             if is_valid_mac(mac):
-                # The client name can be '?' or contain spaces, so we join the rest of the parts.
-                client_name = ' '.join(parts[4:]) if parts[4] != '?' else None
-                devices.append({'ip': ip, 'mac': mac, 'hostname': client_name, 'vendor': None})
+                # The client name can be '?' or contain spaces.
+                hostname = ' '.join(parts[5:]) if parts[5] != '?' else None
+                
+                devices.append({'ip': ip, 'mac': mac, 'hostname': hostname, 'subnet': subnet, 'vendor': None})
     return devices
 
 

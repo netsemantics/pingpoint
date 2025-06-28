@@ -1,57 +1,80 @@
-body.dark-theme {
-    background-color: #121212;
-    color: #e0e0e0;
+:root {
+  --primary: #9b59b6;
+  --primary-hover: #8e44ad;
+  --background-color: #2c3e50;
+  --card-background-color: #34495e;
+  --text-color: #ecf0f1;
+  --h1-color: #ecf0f1;
+  --h2-color: #ecf0f1;
+  --subnet-banner-background-color: #2c3e50;
+  --subnet-banner-text-color: #ffffff;
+  color-scheme: dark;
 }
 
-.dark-theme header {
-    background-color: #1f1f1f;
-    color: #e0e0e0;
+body {
+  font-size: 14px;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
 }
 
-.dark-theme h1, .dark-theme h2 {
-    color: #e0e0e0;
+header {
+    background-color: var(--card-background-color);
+    color: var(--h1-color);
+    padding: 1rem;
+    margin-bottom: 1rem;
 }
 
-.dark-theme table {
-    background-color: #1e1e1e;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+h1, h2 {
+    color: var(--h1-color);
 }
 
-.dark-theme th {
-    background-color: #333;
-    border-bottom: 1px solid #444;
+table {
+    background-color: var(--card-background-color);
+    color: var(--text-color);
 }
 
-.dark-theme td {
-    border-bottom: 1px solid #444;
+th, td {
+    border-color: var(--background-color);
 }
 
-.dark-theme #timeline {
+.subnet-banner {
+  background-color: var(--subnet-banner-background-color);
+  color: var(--subnet-banner-text-color);
+  font-weight: bold;
+}
+
+#actions-section button {
+    width: auto;
+    min-width: 150px;
+}
+
+#timeline {
     border: 1px solid #444;
-    background-color: #1e1e1e;
+    background-color: var(--card-background-color);
 }
 
-.dark-theme .vis-timeline {
-    background-color: #1e1e1e;
-    color: #e0e0e0;
+.vis-timeline {
+    background-color: var(--card-background-color);
+    color: var(--text-color);
     border: 1px solid #444;
 }
 
-.dark-theme .vis-item {
+.vis-item {
     background-color: #333;
     border-color: #555;
-    color: #e0e0e0;
+    color: var(--text-color);
 }
 
-.dark-theme .vis-item.vis-selected {
+.vis-item.vis-selected {
     background-color: #555;
     border-color: #777;
 }
 
-.dark-theme .vis-time-axis .vis-text {
-    color: #e0e0e0;
+.vis-time-axis .vis-text {
+    color: var(--text-color);
 }
 
-.dark-theme .vis-grid {
+.vis-grid {
     border-color: #444;
 }

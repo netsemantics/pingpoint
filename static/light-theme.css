@@ -1,0 +1,51 @@
+:root {
+  --font-size: 14px;
+  --primary: #3498db;
+  --primary-hover: #2980b9;
+  --background-color: #fbfbfb;
+  --card-background-color: #ffffff;
+  --text-color: #333333;
+  --h1-color: #333333;
+  --h2-color: #333333;
+  --subnet-banner-background-color: #e9ecef;
+  --subnet-banner-text-color: #495057;
+  color-scheme: light;
+}
+
+body {
+  font-size: var(--font-size);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+header {
+    background-color: var(--card-background-color);
+    color: var(--h1-color);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+h1, h2 {
+    color: var(--h1-color);
+}
+
+table {
+    background-color: var(--card-background-color);
+    color: var(--text-color);
+}
+
+th, td {
+    border-color: var(--background-color);
+}
+
+.subnet-banner {
+  background-color: var(--subnet-banner-background-color);
+  color: var(--subnet-banner-text-color);
+  font-weight: bold;
+}
+
+#actions-section button {
+    width: auto;
+    min-width: 150px;
+}

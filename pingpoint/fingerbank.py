@@ -36,17 +36,31 @@ class FingerbankClient:
             
             data = response.json()
             if data.get('device_name'):
+                device_name = data.get('device_name')
                 # If the friendly_name is still the default (MAC address), update it.
                 if device.friendly_name == device.mac:
-                    device.friendly_name = data.get('device_name')
+                    device.friendly_name = device_name
 
-                # Always update the vendor if available
-                device.vendor = data.get('device', {}).get('vendor', {}).get('name') or device.vendor
-                
-                # Extract vulnerabilities
-                if 'vulnerabilities' in data:
-                    device.vulnerabilities = data['vulnerabilities']
-                    logging.info(f"Found {len(data['vulnerabilities'])} vulnerabilities for {device.friendly_name}.")
+                # Parse category and vendor from device_name
+                if '/' in device_name:
+                    parts = device_name.split('/', 1)
+                    device.category = parts[0].strip()
+                    device.vendor = parts[1].strip()
+                else:
+                    # If no slash, the whole name is the category
+                    device.category = device_name.strip()
+                    device.vendor = None
+
+                # Extract vulnerabilities and handle different response formats
+                vulnerabilities = data.get('vulnerabilities')
+
+                # The API may return a dictionary with a 'message' key for no CVEs,
+                # an empty list, or a list of CVEs.
+                if vulnerabilities and vulnerabilities != {'message': 'No CVEs for this device'}:
+                    device.vulnerabilities = True
+                    logging.info(f"Vulnerabilities found for {device.friendly_name}.")
+                else:
+                    device.vulnerabilities = False
 
                 logging.info(f"Successfully enriched device {device.friendly_name} from Fingerbank.")
                 return True

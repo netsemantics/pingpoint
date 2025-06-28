@@ -73,7 +73,7 @@ class Inventory:
                     status="online",
                     first_seen=now,
                     last_seen=now,
-                    friendly_name=mac  # Default friendly_name to MAC address
+                    friendly_name=mac
                 )
                 self.devices[mac] = new_device
                 self._add_event("device_joined", new_device, f"New device {mac} joined with IP {ip}", webhook_url)
@@ -99,12 +99,11 @@ class Inventory:
                 # Existing device, update its state
                 existing_device.last_seen = now
                 
-                # Update hostname if it's not already set
+                # Update hostname and subnet if they are not already set
                 if not existing_device.hostname and scanned_device_data.get('hostname'):
                     existing_device.hostname = scanned_device_data.get('hostname')
-                    # Also update friendly_name if it was using the default (MAC address)
-                    if not existing_device.friendly_name or existing_device.friendly_name == existing_device.mac:
-                        existing_device.friendly_name = existing_device.hostname
+                if not existing_device.subnet and scanned_device_data.get('subnet'):
+                    existing_device.subnet = scanned_device_data.get('subnet')
 
                 if existing_device.status == "offline":
                     existing_device.status = "online"

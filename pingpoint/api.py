@@ -63,13 +63,13 @@ app.mount("/static", StaticFiles(directory=ROOT_DIR / "static"), name="static")
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     """Serves the main dashboard page."""
-    with open(ROOT_DIR / "static/index.html") as f:
+    with open(ROOT_DIR / "static/index.html", encoding="utf-8") as f:
         return HTMLResponse(content=f.read(), status_code=200)
 
 @app.get("/config", response_class=HTMLResponse)
 async def read_config_page(request: Request):
     """Serves the configuration page."""
-    with open(ROOT_DIR / "static/config.html") as f:
+    with open(ROOT_DIR / "static/config.html", encoding="utf-8") as f:
         return HTMLResponse(content=f.read(), status_code=200)
 
 

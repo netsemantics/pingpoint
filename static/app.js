@@ -1,10 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    const body = document.body;
+    const htmlElement = document.documentElement;
+
+    function applyTheme(theme) {
+        htmlElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (theme === 'dark') {
+            themeToggleBtn.innerHTML = '🌙';
+        } else {
+            themeToggleBtn.innerHTML = '☀️';
+        }
+    }
 
     themeToggleBtn.addEventListener('click', () => {
-        body.classList.toggle('dark-theme');
+        const newTheme = localStorage.getItem('theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(newTheme);
     });
+
+    // Load initial theme
+    const initialTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(initialTheme);
 
     const deviceTableBody = document.getElementById('device-table-body');
     const timelineContainer = document.getElementById('timeline');
@@ -51,9 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error('Failed to save details.');
             }
+            alert('Device details saved successfully!');
         } catch (error) {
             console.error(`Failed to update device ${mac}:`, error);
-            // Optionally, show an error message to the user
+            alert('Failed to save device details.');
         }
     };
 
@@ -168,13 +184,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 row.innerHTML = `
                     <td><span class="status-dot ${statusClass}"></span> ${device.status}</td>
-                    <td><input type="text" class="editable" data-field="friendly_name" value="${device.friendly_name || ''}" placeholder="Add name..."></td>
+                    <td><input type="text" class="editable" data-field="friendly_name" value="${(device.friendly_name !== device.mac ? device.friendly_name : '') || ''}" placeholder="Add name..."></td>
+                    <td>${device.hostname || 'N/A'}</td>
+                    <td>${device.subnet || 'N/A'}</td>
                     <td>${device.mac}</td>
                     <td>${device.ip_addresses.join(', ') || 'N/A'}</td>
                     <td>${device.vendor || 'Unknown'}</td>
+                    <td>${device.category || 'N/A'}</td>
                     <td><input type="text" class="editable" data-field="notes" value="${device.notes || ''}" placeholder="Add notes..."></td>
-                    <td class="vulnerabilities-cell" data-vulnerabilities='${JSON.stringify(device.vulnerabilities)}'>
-                        ${device.vulnerabilities.length > 0 ? `<a href="#">${device.vulnerabilities.length} found</a>` : 'None'}
+                    <td>
+                        ${device.vulnerabilities ? 'Yes' : 'No'}
                     </td>
                     <td>${new Date(device.last_seen).toLocaleString()}</td>
                     <td><input type="checkbox" class="critical-checkbox" data-field="alert_on_offline" ${device.alert_on_offline ? 'checked' : ''}></td>
@@ -196,17 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Add event listeners for vulnerability cells
-        document.querySelectorAll('.vulnerabilities-cell a').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const cell = e.target.closest('.vulnerabilities-cell');
-                const vulnerabilities = JSON.parse(cell.dataset.vulnerabilities);
-                if (vulnerabilities.length > 0) {
-                    alert(vulnerabilities.map(v => `• ${v.name}: ${v.description}`).join('\n'));
-                }
-            });
-        });
 
         // Add focus/blur listeners for expanding input fields
         document.querySelectorAll('#device-table-body input[type="text"]').forEach(input => {
