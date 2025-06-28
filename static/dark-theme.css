@@ -21,8 +21,8 @@ body {
 header {
     background-color: var(--card-background-color);
     color: var(--h1-color);
-    padding: 1rem;
-    margin-bottom: 1rem;
+    padding: .5rem;
+    margin-bottom: .5rem;
 }
 
 h1, h2 {
