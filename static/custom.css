@@ -46,6 +46,15 @@ th, td {
     border-color: var(--background-color);
 }
 
+td input.editable {
+    width: 140px;
+    transition: width 0.2s ease-in-out;
+}
+
+td input.editable.editing {
+    width: 220px;
+}
+
 .subnet-banner {
   background-color: var(--subnet-banner-background-color);
   color: var(--subnet-banner-text-color);
@@ -67,6 +76,6 @@ th, td {
 
 @media (min-width: 1200px) {
     body > header {
-        --block-spacing-vertical: 0;
+        --block-spacing-vertical: 1;
     }
 }

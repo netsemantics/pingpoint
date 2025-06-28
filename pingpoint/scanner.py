@@ -147,14 +147,15 @@ def is_valid_mac(mac):
 def parse_edgemax_arp(arp_data):
     """Parses the output of 'show arp' from an EdgeMax router."""
     devices = []
-    lines = arp_data.strip().split('\n')[1:]  # Skip header
+    # Regex to capture IP and MAC, allowing for variable spacing
+    arp_pattern = re.compile(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s+.*\s+([0-9a-fA-F:]{17})')
+    lines = arp_data.strip().split('\n')
     for line in lines:
-        parts = line.split()
-        if len(parts) >= 4:
-            ip = parts[0]
-            mac = parts[3] if parts[3] != '<incomplete>' else None
-            if mac and is_valid_mac(mac):
-                devices.append({'ip': ip, 'mac': mac, 'vendor': None}) # Vendor info not in arp table
+        match = arp_pattern.search(line)
+        if match:
+            ip, mac = match.groups()
+            if is_valid_mac(mac):
+                devices.append({'ip': ip, 'mac': mac, 'vendor': None})
     return devices
 
 def parse_edgemax_leases(leases_data):

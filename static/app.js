@@ -217,12 +217,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         // Add focus/blur listeners for expanding input fields
-        document.querySelectorAll('#device-table-body input[type="text"]').forEach(input => {
+        document.querySelectorAll('#device-table-body input.editable').forEach(input => {
             input.addEventListener('focus', (e) => {
-                e.target.style.width = '220px';
+                e.target.classList.add('editing');
             });
             input.addEventListener('blur', (e) => {
-                e.target.style.width = '140px';
+                e.target.classList.remove('editing');
             });
         });
     };

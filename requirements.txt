@@ -4,3 +4,5 @@ paramiko
 pyyaml
 requests
 python-dotenv
+pytest
+curio
